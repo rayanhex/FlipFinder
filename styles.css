@@ -1,0 +1,168 @@
+/* FlipFinder Pro - Content Script Styles */
+
+.flipfinder-profit-badge {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    background: linear-gradient(135deg, #00C851, #007E33) !important;
+    color: white !important;
+    padding: 6px 10px !important;
+    border-radius: 20px !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+    z-index: 10000 !important;
+    user-select: none !important;
+    pointer-events: none !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    min-width: 60px !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+  }
+  
+  .flipfinder-profit-badge.analyzing {
+    background: linear-gradient(135deg, #FF6B00, #FF8F00) !important;
+    animation: flipfinder-spin 1s linear infinite !important;
+  }
+  
+  /* RED - Worst (Loss) - No animation */
+  .flipfinder-profit-badge.negative {
+    background: linear-gradient(135deg, #F44336, #D32F2F) !important;
+  }
+  
+  /* YELLOW/ORANGE - Okay (Low profit) - No animation */
+  .flipfinder-profit-badge.low-profit {
+    background: linear-gradient(135deg, #FFB74D, #FF9800) !important;
+  }
+  
+  /* GREEN - Good (Medium profit) - No animation */
+  .flipfinder-profit-badge.good-profit {
+    background: linear-gradient(135deg, #4CAF50, #2E7D32) !important;
+  }
+  
+  /* PURPLE - Best (High profit) - With animation */
+  .flipfinder-profit-badge.best-profit {
+    background: linear-gradient(135deg, #9C27B0, #6A1B9A) !important;
+    animation: flipfinder-pulse 2s infinite !important;
+  }
+  
+  .flipfinder-details {
+    font-size: 10px !important;
+    margin-top: 2px !important;
+    opacity: 0.9 !important;
+    font-weight: normal !important;
+  }
+  
+  /* Animations */
+  @keyframes flipfinder-pulse {
+    0%, 100% { 
+      transform: scale(1) !important;
+      opacity: 1 !important;
+    }
+    50% { 
+      transform: scale(1.05) !important;
+      opacity: 0.9 !important;
+    }
+  }
+  
+  @keyframes flipfinder-spin {
+    0% { transform: rotate(0deg) !important; }
+    100% { transform: rotate(360deg) !important; }
+  }
+  
+  @keyframes flipfinder-bounce {
+    0%, 100% { 
+      transform: translateY(0) scale(1) !important;
+    }
+    50% { 
+      transform: translateY(-2px) scale(1.02) !important;
+    }
+  }
+  
+  @keyframes flipfinder-glow {
+    0% { 
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.6) !important;
+      transform: scale(1) !important;
+    }
+    100% { 
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.9) !important;
+      transform: scale(1.03) !important;
+    }
+  }
+  
+  /* Ensure badges don't interfere with Facebook's layout */
+  .flipfinder-profit-badge:hover {
+    transform: scale(1.1) !important;
+    transition: transform 0.2s ease !important;
+  }
+  
+  /* Special styling for different Facebook Marketplace layouts */
+  [data-pagelet="MarketplaceSearch"] .flipfinder-profit-badge {
+    top: 4px !important;
+    right: 4px !important;
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+  }
+  
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    .flipfinder-profit-badge {
+      font-size: 10px !important;
+      padding: 4px 6px !important;
+      min-width: 50px !important;
+    }
+    
+    .flipfinder-details {
+      font-size: 8px !important;
+    }
+  }
+  
+  /* Dark mode compatibility */
+  @media (prefers-color-scheme: dark) {
+    .flipfinder-profit-badge {
+      border: 1px solid rgba(255,255,255,0.3) !important;
+    }
+  }
+  
+  /* Ensure badges appear above Facebook's elements */
+  [role="article"] {
+    position: relative !important;
+  }
+  
+  /* Loading state styling */
+  .flipfinder-loading {
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%) !important;
+    background-size: 200% 100% !important;
+    animation: flipfinder-shimmer 1.5s infinite !important;
+  }
+  
+  @keyframes flipfinder-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  /* Error state styling */
+  .flipfinder-error {
+    background: linear-gradient(135deg, #F44336, #D32F2F) !important;
+    animation: flipfinder-shake 0.5s ease-in-out !important;
+  }
+  
+  @keyframes flipfinder-shake {
+    0%, 100% { transform: translateX(0) !important; }
+    25% { transform: translateX(-2px) !important; }
+    75% { transform: translateX(2px) !important; }
+  }
+  
+  /* Tooltip functionality (future enhancement) */
+  .flipfinder-profit-badge[data-tooltip] {
+    cursor: help !important;
+    pointer-events: all !important;
+  }
+  
+  /* Make sure badges work with Facebook's dynamic content loading */
+  .flipfinder-profit-badge {
+    will-change: transform, opacity !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }

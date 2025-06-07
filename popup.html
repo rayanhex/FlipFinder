@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 350px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .tagline {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+    
+    .stats {
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    .stat-value {
+      font-weight: bold;
+      color: #FFD700;
+    }
+    
+    .settings {
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .setting-label {
+      font-size: 14px;
+    }
+    
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 20px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .toggle.active {
+      background: #4CAF50;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s;
+    }
+    
+    .toggle.active .toggle-slider {
+      transform: translateX(20px);
+    }
+    
+    .input-group {
+      margin-bottom: 12px;
+    }
+    
+    .input-label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 5px;
+      opacity: 0.9;
+    }
+    
+    .input-field {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    
+    .input-field::placeholder {
+      color: rgba(255,255,255,0.7);
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #FF6B00, #FF8F00);
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 10px;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    .btn.secondary {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .status {
+      text-align: center;
+      font-size: 12px;
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    
+    .status.success {
+      background: rgba(76, 175, 80, 0.3);
+    }
+    
+    .status.error {
+      background: rgba(244, 67, 54, 0.3);
+    }
+    
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      opacity: 0.8;
+      margin-top: 15px;
+    }
+    
+    .upgrade-banner {
+      background: linear-gradient(135deg, #FFD700, #FFA000);
+      color: #333;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">💰 FlipFinder Pro</div>
+    <div class="tagline">AI-Powered Profit Discovery</div>
+  </div>
+  
+  <div id="upgrade-banner" class="upgrade-banner hidden">
+    🚀 Upgrade to Pro for unlimited scans!
+  </div>
+  
+  <div class="stats">
+    <div class="stat-item">
+      <span>Products Analyzed:</span>
+      <span class="stat-value" id="products-analyzed">0</span>
+    </div>
+    <div class="stat-item">
+      <span>Profitable Deals Found:</span>
+      <span class="stat-value" id="profitable-deals">0</span>
+    </div>
+    <div class="stat-item">
+      <span>Potential Profit:</span>
+      <span class="stat-value" id="total-profit">$0</span>
+    </div>
+    <div class="stat-item">
+      <span>API Calls Used:</span>
+      <span class="stat-value" id="api-usage">0/1000</span>
+    </div>
+  </div>
+  
+  <div class="settings">
+    <div class="setting-item">
+      <span class="setting-label">Enable Extension</span>
+      <div class="toggle active" id="enable-toggle">
+        <div class="toggle-slider"></div>
+      </div>
+    </div>
+    
+    <div class="setting-item">
+      <span class="setting-label">Show Negative Profits</span>
+      <div class="toggle active" id="negative-toggle">
+        <div class="toggle-slider"></div>
+      </div>
+    </div>
+    
+    <div class="input-group">
+      <label class="input-label">Minimum Profit Threshold ($)</label>
+      <input type="number" class="input-field" id="profit-threshold" placeholder="10" value="10">
+    </div>
+    
+    <div class="input-group">
+      <label class="input-label">eBay Client ID</label>
+      <input type="text" class="input-field" id="ebay-client-id" placeholder="Enter your eBay API Client ID">
+    </div>
+    
+    <div class="input-group">
+      <label class="input-label">OpenAI API Key</label>
+      <input type="password" class="input-field" id="openai-api-key" placeholder="Enter your OpenAI API key">
+    </div>
+  </div>
+  
+  <div id="status" class="status hidden"></div>
+  
+  <button class="btn" id="save-settings">Save Settings</button>
+  <button class="btn secondary" id="test-connection">Test API Connection</button>
+  <button class="btn secondary" id="clear-cache">Clear Cache</button>
+  
+  <div class="footer">
+    <div>FlipFinder Pro v1.0</div>
+    <div>Made with ❤️ for resellers</div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

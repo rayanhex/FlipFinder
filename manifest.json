@@ -1,0 +1,45 @@
+{
+    "manifest_version": 3,
+    "name": "FlipFinder Pro",
+    "version": "1.0",
+    "description": "Show profit potential on Facebook Marketplace items instantly",
+    
+    "permissions": [
+      "activeTab",
+      "storage"
+    ],
+    
+    "host_permissions": [
+      "https://www.facebook.com/*",
+      "https://facebook.com/*",
+      "https://api.ebay.com/*",
+      "https://svcs.ebay.com/*",
+      "https://api.openai.com/*"
+    ],
+    
+    "content_scripts": [
+      {
+        "matches": [
+          "https://www.facebook.com/marketplace/*",
+          "https://facebook.com/marketplace/*"
+        ],
+        "js": ["content.js"],
+        "css": ["styles.css"]
+      }
+    ],
+    
+    "background": {
+      "service_worker": "background.js"
+    },
+    
+    "action": {
+      "default_popup": "popup.html",
+      "default_title": "FlipFinder Pro"
+    },
+    
+    "icons": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  }
