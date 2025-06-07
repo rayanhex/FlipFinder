@@ -3,9 +3,9 @@ console.log('FlipFinder Pro: Extension loaded');
 
 // Configuration
 const CONFIG = {
-  API_BASE_URL: 'https://api.flipfinder.pro', // Your backend API
+  API_BASE_URL: 'http://localhost:3000', // Your backend API
   MIN_CONFIDENCE_THRESHOLD: 0.7,
-  DEMO_MODE: true // 🎯 TOGGLE THIS TO FALSE WHEN BACKEND IS READY
+  DEMO_MODE: false // 🎯 TOGGLE THIS TO FALSE WHEN BACKEND IS READY
 };
 
 // Main class to handle Facebook Marketplace integration
