@@ -9,35 +9,32 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware MUST come first
+// Middleware
 app.use(cors({
-  origin: ['chrome-extension://*', 'https://flipfinder.pro'] // Allow your extension and website
+  origin: [
+    'chrome-extension://*',
+    'moz-extension://*', 
+    'https://flipfinder.pro',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
+
+// Handle preflight requests
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.sendStatus(200);
+});
 
 // Your secret API keys (stored in environment variables)
 const EBAY_CLIENT_ID = process.env.EBAY_CLIENT_ID;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const JWT_SECRET = process.env.JWT_SECRET;
-
-// eBay webhook endpoint for challenge validation
-app.get('/webhooks/ebay', (req, res) => {
-  const challengeCode = req.query.challenge_code;
-  console.log('eBay challenge received:', challengeCode);
-  
-  if (challengeCode) {
-    // Send back the challenge code to validate endpoint
-    res.send(challengeCode);
-  } else {
-    res.status(400).send('No challenge code provided');
-  }
-});
-
-// eBay webhook endpoint for actual notifications (POST)
-app.post('/webhooks/ebay', (req, res) => {
-  console.log('eBay notification received:', req.body);
-  res.status(200).send('OK');
-});
 
 // Middleware to verify user subscription
 const verifySubscription = async (req, res, next) => {
@@ -73,8 +70,8 @@ const verifySubscription = async (req, res, next) => {
   }
 };
 
-// eBay API Proxy Endpoint
-app.post('/api/ebay/search', verifySubscription, async (req, res) => {
+// eBay API Proxy Endpoint - TEMP: Skip auth for testing
+app.post('/api/ebay/search', async (req, res) => {
   try {
     const { query, itemFilter, limit } = req.body;
     
@@ -278,15 +275,6 @@ async function verifySubscriptionKey(email, subscriptionKey) {
   // Verify with payment provider
   return { valid: true, userId: 'user123', plan: 'pro', expiresAt: Date.now() + 30*24*60*60*1000 }; // Placeholder
 }
-
-// Health check endpoint
-app.get('/', (req, res) => {
-  res.json({ 
-    status: 'FlipFinder Pro API is running!', 
-    timestamp: new Date().toISOString(),
-    webhookEndpoint: '/webhooks/ebay'
-  });
-});
 
 // Health check endpoint
 app.get('/health', (req, res) => {

@@ -447,6 +447,12 @@ class FlipFinderExtension {
     }
   }
 
+  async getUserToken() {
+    // Get user's subscription token (stored securely)
+    const result = await chrome.storage.sync.get(['userToken']);
+    return result.userToken || '';
+  }
+
   // 🎯 NEW: Check if product is resellable on eBay
   async isResellableProduct(listingData) {
     // 🎯 DEMO MODE - Skip AI filtering for demo
