@@ -9,6 +9,25 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// eBay webhook endpoint for challenge validation
+app.get('/webhooks/ebay', (req, res) => {
+  const challengeCode = req.query.challenge_code;
+  console.log('eBay challenge received:', challengeCode);
+  
+  if (challengeCode) {
+    // Send back the challenge code to validate endpoint
+    res.send(challengeCode);
+  } else {
+    res.status(400).send('No challenge code provided');
+  }
+});
+
+// eBay webhook endpoint for actual notifications (POST)
+app.post('/webhooks/ebay', (req, res) => {
+  console.log('eBay notification received:', req.body);
+  res.status(200).send('OK');
+});
+
 // Middleware
 app.use(cors({
   origin: ['chrome-extension://*', 'https://flipfinder.pro'] // Allow your extension and website
@@ -259,6 +278,15 @@ async function verifySubscriptionKey(email, subscriptionKey) {
   // Verify with payment provider
   return { valid: true, userId: 'user123', plan: 'pro', expiresAt: Date.now() + 30*24*60*60*1000 }; // Placeholder
 }
+
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'FlipFinder Pro API is running!', 
+    timestamp: new Date().toISOString(),
+    webhookEndpoint: '/webhooks/ebay'
+  });
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
