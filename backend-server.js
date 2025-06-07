@@ -9,6 +9,17 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware MUST come first
+app.use(cors({
+  origin: ['chrome-extension://*', 'https://flipfinder.pro'] // Allow your extension and website
+}));
+app.use(express.json());
+
+// Your secret API keys (stored in environment variables)
+const EBAY_CLIENT_ID = process.env.EBAY_CLIENT_ID;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const JWT_SECRET = process.env.JWT_SECRET;
+
 // eBay webhook endpoint for challenge validation
 app.get('/webhooks/ebay', (req, res) => {
   const challengeCode = req.query.challenge_code;
@@ -27,17 +38,6 @@ app.post('/webhooks/ebay', (req, res) => {
   console.log('eBay notification received:', req.body);
   res.status(200).send('OK');
 });
-
-// Middleware
-app.use(cors({
-  origin: ['chrome-extension://*', 'https://flipfinder.pro'] // Allow your extension and website
-}));
-app.use(express.json());
-
-// Your secret API keys (stored in environment variables)
-const EBAY_CLIENT_ID = process.env.EBAY_CLIENT_ID;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const JWT_SECRET = process.env.JWT_SECRET;
 
 // Middleware to verify user subscription
 const verifySubscription = async (req, res, next) => {
