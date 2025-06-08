@@ -3,9 +3,7 @@ console.log('FlipFinder Pro: Extension loaded');
 
 // Configuration
 const CONFIG = {
-  API_BASE_URL: 'http://localhost:3000', // Your backend API
-  MIN_CONFIDENCE_THRESHOLD: 0.7,
-  DEMO_MODE: false // 🎯 TOGGLE THIS TO FALSE WHEN BACKEND IS READY
+  MIN_CONFIDENCE_THRESHOLD: 0.7
 };
 
 // Main class to handle Facebook Marketplace integration
@@ -13,15 +11,29 @@ class FlipFinderExtension {
   constructor() {
     this.processedListings = new Set();
     this.settings = {};
+    console.log('FlipFinder Pro: Constructor called');
     this.init();
   }
 
   async init() {
-    // Load settings from storage
-    await this.loadSettings();
-    this.addCustomStyles();
-    this.startObserving();
-    this.processExistingListings();
+    console.log('FlipFinder Pro: Init starting');
+    try {
+      // Load settings from storage
+      await this.loadSettings();
+      console.log('FlipFinder Pro: Settings loaded', this.settings);
+      
+      this.addCustomStyles();
+      console.log('FlipFinder Pro: Styles added');
+      
+      this.startObserving();
+      console.log('FlipFinder Pro: Observer started');
+      
+      this.processExistingListings();
+      console.log('FlipFinder Pro: Processing existing listings');
+      
+    } catch (error) {
+      console.error('FlipFinder Pro: Init error:', error);
+    }
   }
 
   async loadSettings() {
@@ -118,8 +130,48 @@ class FlipFinderExtension {
 
   processExistingListings() {
     // Process listings that are already on the page
+    console.log('FlipFinder Pro: Looking for existing listings');
     const listings = this.findMarketplaceListings();
-    listings.forEach(listing => this.processListing(listing));
+    console.log(`FlipFinder Pro: Found ${listings.length} existing listings`);
+    
+    // Test with just the first listing
+    if (listings.length > 0) {
+      console.log('FlipFinder Pro: Testing with first listing only');
+      const firstListing = listings[0];
+      console.log('FlipFinder Pro: First listing element:', firstListing);
+      
+      // Call function directly without async
+      this.testProcessListing(firstListing);
+    }
+  }
+
+  testProcessListing(element) {
+    console.log('FlipFinder Pro: *** ENTERING testProcessListing ***');
+    
+    try {
+      // Just add a badge directly
+      const badge = document.createElement('div');
+      badge.textContent = 'TEST BADGE';
+      badge.style.cssText = `
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: red;
+        color: white;
+        padding: 5px;
+        border-radius: 5px;
+        z-index: 9999;
+        font-size: 12px;
+      `;
+      
+      element.style.position = 'relative';
+      element.appendChild(badge);
+      
+      console.log('FlipFinder Pro: Test badge added successfully');
+      
+    } catch (error) {
+      console.error('FlipFinder Pro: Error in testProcessListing:', error);
+    }
   }
 
   processNewListings(container) {
@@ -138,6 +190,8 @@ class FlipFinderExtension {
 
   findMarketplaceListings() {
     // Find all marketplace listings on current page
+    console.log('FlipFinder Pro: Searching for marketplace listings');
+    
     const selectors = [
       'div[role="article"]', // Main listing containers
       'a[role="link"]', // Linked listings
@@ -145,10 +199,15 @@ class FlipFinderExtension {
     
     const allElements = [];
     selectors.forEach(selector => {
-      allElements.push(...document.querySelectorAll(selector));
+      const elements = document.querySelectorAll(selector);
+      console.log(`FlipFinder Pro: Found ${elements.length} elements with selector: ${selector}`);
+      allElements.push(...elements);
     });
     
-    return allElements.filter(el => this.isMarketplaceListing(el));
+    const marketplaceListings = allElements.filter(el => this.isMarketplaceListing(el));
+    console.log(`FlipFinder Pro: Filtered to ${marketplaceListings.length} marketplace listings`);
+    
+    return marketplaceListings;
   }
 
   isMarketplaceListing(element) {
@@ -182,6 +241,8 @@ class FlipFinderExtension {
         console.log(`FlipFinder Pro: Skipping non-resellable item: ${listingData.title}`);
         return;
       }
+      
+      console.log(`FlipFinder Pro: Processing resellable item: ${listingData.title} - ${listingData.price}`);
       
       // Add analyzing badge
       this.addAnalyzingBadge(listingElement);
@@ -269,11 +330,6 @@ class FlipFinderExtension {
   }
 
   async calculateProfit(listingData) {
-    // 🎯 DEMO MODE - Remove this entire block when eBay API is ready
-    if (CONFIG.DEMO_MODE) {
-      return this.generateDemoProfit(listingData);
-    }
-    
     try {
       // Step 1: Try exact title match on eBay
       let eBaySearchQuery = listingData.title;
@@ -321,125 +377,62 @@ class FlipFinderExtension {
     }
   }
 
-  // 🎯 DEMO MODE FUNCTION - DELETE THIS ENTIRE FUNCTION WHEN EBAY API IS READY
-  generateDemoProfit(listingData) {
-    // Simulate realistic profit scenarios based on price ranges
-    const { price } = listingData;
-    
-    // Different profit scenarios based on item price
-    const scenarios = [
-      { profit: Math.round(price * 0.3), margin: 30, samples: 3 }, // 30% profit
-      { profit: Math.round(price * 0.5), margin: 50, samples: 3 }, // 50% profit  
-      { profit: Math.round(price * 0.8), margin: 80, samples: 3 }, // 80% profit
-      { profit: Math.round(price * 1.2), margin: 120, samples: 3 }, // 120% profit
-      { profit: -Math.round(price * 0.1), margin: -10, samples: 3 }, // Loss
-      { profit: Math.round(price * 0.1), margin: 10, samples: 3 }, // Small profit
-    ];
-    
-    // Weighted selection (favor profitable scenarios for demo)
-    const weights = [20, 25, 20, 15, 5, 15]; // Higher chance of good profits
-    const randomIndex = this.weightedRandom(weights);
-    const scenario = scenarios[randomIndex];
-    
-    return {
-      profit: scenario.profit,
-      profitMargin: scenario.margin.toFixed(1),
-      avgSoldPrice: price + scenario.profit,
-      fbPrice: price,
-      sampleSize: scenario.samples,
-      searchQuery: `${listingData.title} (Demo)`,
-      isDemo: true // Flag to identify demo data
-    };
-  }
-
-  // 🎯 DEMO MODE HELPER - DELETE THIS FUNCTION WHEN EBAY API IS READY
-  weightedRandom(weights) {
-    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
-    let random = Math.random() * totalWeight;
-    
-    for (let i = 0; i < weights.length; i++) {
-      random -= weights[i];
-      if (random <= 0) return i;
-    }
-    return 0;
-  }
-
   async searcheBaySoldListings(query) {
-    // Call your backend API instead of eBay directly
+    // Use Chrome extension messaging to call eBay API from background script
     try {
-      const response = await fetch(`${CONFIG.API_BASE_URL}/api/ebay/search`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await this.getUserToken()}` // User's subscription token
-        },
-        body: JSON.stringify({
-          query: query,
-          itemFilter: 'SoldItemsOnly',
-          limit: 3
-        })
+      const response = await chrome.runtime.sendMessage({
+        action: 'searcheBay',
+        query: query
       });
       
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+      if (response.success) {
+        return response.data;
+      } else {
+        console.error('FlipFinder Pro: eBay search failed:', response.error);
+        return [];
       }
       
-      const data = await response.json();
-      return data.soldItems || [];
-      
     } catch (error) {
-      console.error('FlipFinder Pro: Backend API error:', error);
+      console.error('FlipFinder Pro: eBay search error:', error);
       return [];
     }
   }
 
   async enhanceTitleWithAI(title) {
-    // Call your backend API for OpenAI requests
+    // Use Chrome extension messaging for OpenAI API calls
     try {
-      const response = await fetch(`${CONFIG.API_BASE_URL}/api/ai/enhance-title`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await this.getUserToken()}`
-        },
-        body: JSON.stringify({
-          title: title
-        })
+      const response = await chrome.runtime.sendMessage({
+        action: 'enhanceTitle',
+        title: title
       });
       
-      if (!response.ok) {
-        throw new Error(`AI API Error: ${response.status}`);
+      if (response.success) {
+        return response.data;
+      } else {
+        console.error('FlipFinder Pro: Title enhancement failed:', response.error);
+        return null;
       }
       
-      const data = await response.json();
-      return data.enhancedTitle;
-      
     } catch (error) {
-      console.error('FlipFinder Pro: AI API error:', error);
+      console.error('FlipFinder Pro: Title enhancement error:', error);
       return null;
     }
   }
 
   async analyzeImageWithAI(imageUrl) {
-    // Call your backend API for image analysis
+    // Use Chrome extension messaging for image analysis
     try {
-      const response = await fetch(`${CONFIG.API_BASE_URL}/api/ai/analyze-image`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await this.getUserToken()}`
-        },
-        body: JSON.stringify({
-          imageUrl: imageUrl
-        })
+      const response = await chrome.runtime.sendMessage({
+        action: 'analyzeImage',
+        imageUrl: imageUrl
       });
       
-      if (!response.ok) {
-        throw new Error(`Image AI Error: ${response.status}`);
+      if (response.success) {
+        return response.data;
+      } else {
+        console.error('FlipFinder Pro: Image analysis failed:', response.error);
+        return null;
       }
-      
-      const data = await response.json();
-      return data.productName;
       
     } catch (error) {
       console.error('FlipFinder Pro: Image analysis error:', error);
@@ -453,84 +446,30 @@ class FlipFinderExtension {
     return result.userToken || '';
   }
 
-  // 🎯 NEW: Check if product is resellable on eBay
+  // Check if product is resellable on eBay using AI
   async isResellableProduct(listingData) {
-    // 🎯 DEMO MODE - Skip AI filtering for demo
-    if (CONFIG.DEMO_MODE) {
-      return this.isResellableProductDemo(listingData.title);
-    }
-    
     try {
       if (!this.settings.openaiApiKey) {
         // If no API key, use basic keyword filtering
         return this.isResellableProductBasic(listingData.title);
       }
       
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.settings.openaiApiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [{
-            role: 'user',
-            content: `Analyze this Facebook Marketplace listing title: "${listingData.title}"
-
-Is this a PHYSICAL PRODUCT that could be resold on eBay? 
-
-RESPOND WITH ONLY: YES or NO
-
-Examples:
-- "iPhone 15 Pro Max" → YES (physical electronics)
-- "Canon camera" → YES (physical item)
-- "I need employees" → NO (hiring/services)
-- "Hair removal service" → NO (service)
-- "Missing dog" → NO (not for sale)
-- "Room for rent" → NO (real estate/rental)
-- "Car repair" → NO (service)
-- "Tutoring available" → NO (service)
-- "Nike shoes" → YES (physical item)
-
-Title: "${listingData.title}"`
-          }],
-          max_tokens: 10,
-          temperature: 0.1
-        })
+      const response = await chrome.runtime.sendMessage({
+        action: 'checkResellability',
+        title: listingData.title
       });
       
-      if (!response.ok) {
+      if (response.success) {
+        return response.data;
+      } else {
         console.warn('FlipFinder Pro: AI filtering failed, using basic filter');
         return this.isResellableProductBasic(listingData.title);
       }
       
-      const data = await response.json();
-      const result = data.choices?.[0]?.message?.content?.trim().toLowerCase();
-      
-      return result === 'yes';
-      
     } catch (error) {
       console.error('FlipFinder Pro: AI filtering error:', error);
-      // Fallback to basic filtering
       return this.isResellableProductBasic(listingData.title);
     }
-  }
-
-  // 🎯 DEMO MODE FILTER - DELETE WHEN GOING LIVE
-  isResellableProductDemo(title) {
-    // Simple keyword filtering for demo mode
-    const nonResellableKeywords = [
-      'hiring', 'employees', 'job', 'work', 'employment',
-      'hair removal', 'massage', 'service', 'repair',
-      'missing', 'lost', 'found', 'reward',
-      'rent', 'rental', 'lease', 'roommate', 'room for',
-      'tutoring', 'lessons', 'teaching', 'coaching',
-      'cleaning', 'handyman', 'contractor'
-    ];
-    
-    const titleLower = title.toLowerCase();
-    return !nonResellableKeywords.some(keyword => titleLower.includes(keyword));
   }
 
   // Basic keyword filtering (fallback when AI fails)
@@ -569,6 +508,7 @@ Title: "${listingData.title}"`
     // If unclear and has a reasonable price, probably resellable
     return true; // Default to showing badge if unsure
   }
+
   updateProfitBadge(element, profitData) {
     const badge = element.querySelector('[data-flipfinder="true"]');
     if (!badge) return;
@@ -579,32 +519,37 @@ Title: "${listingData.title}"`
       return;
     }
     
-    const { profit, profitMargin, avgSoldPrice, isDemo } = profitData;
+    const { profit, profitMargin, sampleSize, isDemo } = profitData;
     
     // Determine badge style based on profit
     let badgeClass = 'flipfinder-profit-badge';
-    let profitText = `Profit: $${profit}`;
+    let emoji = '💰';
     
     if (profit < 0) {
       badgeClass += ' negative';
-      profitText = `Loss: $${Math.abs(profit)}`;
+      emoji = '❌';
     } else if (profit < 20) {
       badgeClass += ' low-profit';
-    } else if (profit < 50) {
-      badgeClass += ' good-profit';
-    } else {
-      badgeClass += ' best-profit';
+      emoji = '💵';
+    } else if (profit >= 100) {
+      badgeClass += ' insane-profit';
+      emoji = '🚀';
+    } else if (profit >= 50) {
+      badgeClass += ' high-profit';
+      emoji = '💎';
     }
     
     badge.className = badgeClass;
     
+    // 🎯 DEMO MODE INDICATOR - Remove "DEMO" text when eBay API is ready
     const demoText = isDemo ? ' (DEMO)' : '';
     
     badge.innerHTML = `
-      eBay Price: $${avgSoldPrice}
-      <div class="flipfinder-details">${profitText} (${profitMargin}%)${demoText}</div>
+      ${emoji} ${profit}
+      <div class="flipfinder-details">${profitMargin}% margin (${sampleSize} sold)${demoText}</div>
     `;
   }
+
   removeBadge(element) {
     const badge = element.querySelector('[data-flipfinder="true"]');
     if (badge) badge.remove();
@@ -612,10 +557,29 @@ Title: "${listingData.title}"`
 }
 
 // Initialize extension when page loads
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+console.log('FlipFinder Pro: Script executing, document state:', document.readyState);
+
+function initializeExtension() {
+  console.log('FlipFinder Pro: Initializing extension');
+  console.log('FlipFinder Pro: Current URL:', window.location.href);
+  
+  // Check if we're on Facebook Marketplace
+  if (!window.location.href.includes('facebook.com/marketplace')) {
+    console.log('FlipFinder Pro: Not on Facebook Marketplace, skipping initialization');
+    return;
+  }
+  
+  try {
     new FlipFinderExtension();
-  });
+  } catch (error) {
+    console.error('FlipFinder Pro: Failed to initialize:', error);
+  }
+}
+
+if (document.readyState === 'loading') {
+  console.log('FlipFinder Pro: Document still loading, waiting for DOMContentLoaded');
+  document.addEventListener('DOMContentLoaded', initializeExtension);
 } else {
-  new FlipFinderExtension();
+  console.log('FlipFinder Pro: Document ready, initializing immediately');
+  initializeExtension();
 }

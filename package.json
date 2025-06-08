@@ -97,7 +97,6 @@
     "web-streams-polyfill": "^3.3.3",
     "wrappy": "^1.0.2"
   },
-  "devDependencies": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
